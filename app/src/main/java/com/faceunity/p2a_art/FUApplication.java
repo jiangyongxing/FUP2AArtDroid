@@ -3,6 +3,7 @@ package com.faceunity.p2a_art;
 import android.app.Application;
 import android.util.Log;
 
+import com.faceunity.p2a_art.constant.ColorConstant;
 import com.faceunity.p2a_art.core.FUP2ARenderer;
 import com.faceunity.p2a_art.core.client.P2AClientWrapper;
 import com.faceunity.p2a_art.core.authpack;
@@ -45,6 +46,11 @@ public class FUApplication extends Application {
                 + "\nInitNamaTime: " + (endInitNamaTime - startTime)
                 + "\nInitP2ATime: " + (endInitP2ATime - endInitNamaTime)
                 + "\nInitCoreDataTime: " + (endInitCoreDataTime - endInitP2ATime));
+
+        //TODO 风格选择后初始化 P2A client
+        ColorConstant.init(this);
+        //初始化P2A Client
+        P2AClientWrapper.setupStyleData(this);
     }
 
     /**

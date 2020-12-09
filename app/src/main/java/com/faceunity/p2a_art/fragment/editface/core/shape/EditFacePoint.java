@@ -28,4 +28,16 @@ public class EditFacePoint extends Point {
         this.upKey = upKey;
         this.downKey = downKey;
     }
+
+    @Override
+    public String toString() {
+        return "EditFacePoint{" +
+                "index=" + index +
+                ", direction=" + direction +
+                ", leftKey='" + leftKey + '\'' +
+                ", rightKey='" + rightKey + '\'' +
+                ", upKey='" + upKey + '\'' +
+                ", downKey='" + downKey + '\'' +
+                '}';
+    }
 }

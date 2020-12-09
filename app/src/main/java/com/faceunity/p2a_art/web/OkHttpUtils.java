@@ -44,45 +44,45 @@ import okhttp3.Response;
 public class OkHttpUtils {
     private static final String TAG = OkHttpUtils.class.getSimpleName();
     //    public static final String P12_PATH = "p2a.p12";
-    public static final String PEM_PATH = "p2a.pem";
+//    public static final String PEM_PATH = "p2a.pem";
 
     private volatile static OkHttpUtils sOkHttpUtils;
 
     private OkHttpClient mOkHttpClient = null;
 
     public static OkHttpClient initOkHttpClient(Context context) {
-        SSLSocketFactory sslSocketFactory = null;
-        try {
-//            InputStream p12 = context.getAssets().open(P12_PATH);
-//            byte[] p12Bytes = new byte[p12.available()];
-//            p12.read(p12Bytes);
-//            p12.close();
-
-
-            //p2a服务器需要的ca，手动传避免部分机型ca不全
-            InputStream ca = context.getAssets().open(PEM_PATH);
-            byte[] caBytes = new byte[ca.available()];
-            ca.read(caBytes);
-            ca.close();
-
-            TrustManagerFactory tmf = OkHttpUtils.getTrustManagerFactory(caBytes);
-//            sslSocketFactory = new CustomSslSocketFactory(OkHttpUtils.getKeyManagerFactory(p12Bytes).getKeyManagers(),
-//                    tmf == null ? null : tmf.getTrustManagers());
-            sslSocketFactory = new CustomSslSocketFactory(null,
-                    tmf == null ? null : tmf.getTrustManagers());
-        } catch (Exception e) {
-        }
+//        SSLSocketFactory sslSocketFactory = null;
+//        try {
+////            InputStream p12 = context.getAssets().open(P12_PATH);
+////            byte[] p12Bytes = new byte[p12.available()];
+////            p12.read(p12Bytes);
+////            p12.close();
+//
+//
+//            //p2a服务器需要的ca，手动传避免部分机型ca不全
+////            InputStream ca = context.getAssets().open(PEM_PATH);
+////            byte[] caBytes = new byte[ca.available()];
+////            ca.read(caBytes);
+////            ca.close();
+//
+////            TrustManagerFactory tmf = OkHttpUtils.getTrustManagerFactory(caBytes);
+////            sslSocketFactory = new CustomSslSocketFactory(OkHttpUtils.getKeyManagerFactory(p12Bytes).getKeyManagers(),
+////                    tmf == null ? null : tmf.getTrustManagers());
+////            sslSocketFactory = new CustomSslSocketFactory(null,
+////                    tmf == null ? null : tmf.getTrustManagers());
+//        } catch (Exception e) {
+//        }
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .connectTimeout(60000L, TimeUnit.MILLISECONDS)
                 .writeTimeout(60000L, TimeUnit.MILLISECONDS)
                 .readTimeout(60000L, TimeUnit.MILLISECONDS);
         OkHttpClient okHttpClient;
-        if (sslSocketFactory != null) {
-            okHttpClient = builder.sslSocketFactory(sslSocketFactory).build();
-        } else {
-            okHttpClient = builder.build();
-        }
+//        if (sslSocketFactory != null) {
+//            okHttpClient = builder.sslSocketFactory(sslSocketFactory).build();
+//        } else {
+//        }
+        okHttpClient = builder.build();
         return okHttpClient;
     }
 
@@ -245,7 +245,7 @@ public class OkHttpUtils {
         RequestBody requestBody = (new okhttp3.MultipartBody.Builder())
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("gender", String.valueOf(gender))
-                .addFormDataPart("version", Constant.style == Constant.style_new ? Constant.p2a_client_version_new : Constant.p2a_client_version_art)
+                .addFormDataPart("version", "1.0.4")
                 .addFormDataPart("image", "filename", RequestBody.create(MediaType.parse("image/png"), reallyUploadFile))
                 .build();
         if (uploadProgressListener != null) {
@@ -266,6 +266,7 @@ public class OkHttpUtils {
             }
         });
     }
+
 
     /**
      * 请求服务器，下载生成数据
@@ -308,33 +309,33 @@ public class OkHttpUtils {
     /**
      * 这里配置初始化ca，拿到trustmanager
      */
-    public static TrustManagerFactory getTrustManagerFactory(byte[] caBytes) {
-        if (caBytes == null) return null;
-        TrustManagerFactory tmf = null;
-        try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            InputStream caInput = new ByteArrayInputStream(caBytes);
-            Certificate ca = null;
-            try {
-                ca = cf.generateCertificate(caInput);
-                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                caInput.close();
-            }
-            // Create a KeyStore containing our trusted CAs
-            String keyStoreType = KeyStore.getDefaultType();
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            keyStore.load(null, null);
-            keyStore.setCertificateEntry("ca", ca);
-            // Create a TrustManager that trusts the CAs in our KeyStore
-            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-            tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-            tmf.init(keyStore);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return tmf;
-    }
+//    public static TrustManagerFactory getTrustManagerFactory(byte[] caBytes) {
+//        if (caBytes == null) return null;
+//        TrustManagerFactory tmf = null;
+//        try {
+//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//            InputStream caInput = new ByteArrayInputStream(caBytes);
+//            Certificate ca = null;
+//            try {
+//                ca = cf.generateCertificate(caInput);
+//                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            } finally {
+//                caInput.close();
+//            }
+//            // Create a KeyStore containing our trusted CAs
+//            String keyStoreType = KeyStore.getDefaultType();
+//            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+//            keyStore.load(null, null);
+//            keyStore.setCertificateEntry("ca", ca);
+//            // Create a TrustManager that trusts the CAs in our KeyStore
+//            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+//            tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+//            tmf.init(keyStore);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return tmf;
+//    }
 }

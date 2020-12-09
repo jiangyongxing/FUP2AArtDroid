@@ -38,6 +38,7 @@ import com.faceunity.p2a_art.web.CreateFailureToast;
 import com.faceunity.p2a_art.web.OkHttpUtils;
 import com.faceunity.p2a_art.web.ProgressRequestBody;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -286,9 +287,17 @@ public class TakePhotoFragment extends BaseFragment implements View.OnClickListe
             @Override
             public void onResponse(final Call call, final Response response) throws IOException {
                 final String token = response.body().string();
+                String newToken = "";
                 Log.i(TAG, "getAvatarToken response message " + response.message() + " code " + response.code() + " token " + token);
                 if (response.isSuccessful()) {
-                    OkHttpUtils.updatePicRequest(token, dir + AvatarP2A.FILE_NAME_CLIENT_DATA_ORIGIN_PHOTO, gender, new Callback() {
+                    try {
+                        JSONObject jsonObject = new JSONObject(token);
+                        newToken = jsonObject.getString("token");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    final String finalNewToken = newToken;
+                    OkHttpUtils.updatePicRequest(newToken, dir + AvatarP2A.FILE_NAME_CLIENT_DATA_ORIGIN_PHOTO, gender, new Callback() {
                         @Override
                         public void onFailure(Call c, IOException e) {
                             Log.e(TAG, "updatePicRequest response onFailure " + c.toString() + "\n IOException：\n" + e.toString());
@@ -307,7 +316,7 @@ public class TakePhotoFragment extends BaseFragment implements View.OnClickListe
                                         JSONObject object = jsonObject.getJSONObject("data");
                                         final String taskid = object.getString("taskid");
                                         Log.i(TAG, "updatePicRequest response taskid " + taskid);
-                                        download(token, taskid, dir, gender);
+                                        download(finalNewToken, taskid, dir, gender);
                                         return;
                                     }
                                 } catch (Exception e) {
@@ -373,6 +382,10 @@ public class TakePhotoFragment extends BaseFragment implements View.OnClickListe
                                         && jsonObject.getString("message").equals("PROCESSING")) {
                                     download(token, taskid, dir, gender);
                                     return;
+                                } else if (1 == jsonObject.getInt("code")) {
+                                    JSONObject data = jsonObject.getJSONObject("data");
+                                    int errCode = data.getInt("err_code");
+                                    CreateFailureToast.onCreateFailure(mActivity, String.valueOf(errCode));
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();

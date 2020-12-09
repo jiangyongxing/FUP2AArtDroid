@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -26,7 +27,9 @@ import com.faceunity.p2a_art.constant.FilePathFactory;
 import com.faceunity.p2a_art.core.AvatarHandle;
 import com.faceunity.p2a_art.core.P2ACore;
 import com.faceunity.p2a_art.core.client.AvatarEditor;
+import com.faceunity.p2a_art.core.client.P2AClientWrapper;
 import com.faceunity.p2a_art.entity.AvatarP2A;
+import com.faceunity.p2a_art.entity.BundleRes;
 import com.faceunity.p2a_art.fragment.editface.EditFaceColorItemFragment;
 import com.faceunity.p2a_art.fragment.editface.EditFaceGlassesFragment;
 import com.faceunity.p2a_art.fragment.editface.EditFaceItemFragment;
@@ -43,12 +46,16 @@ import com.faceunity.p2a_art.fragment.editface.core.shape.ParamRes;
 import com.faceunity.p2a_art.ui.BottomTitleGroup;
 import com.faceunity.p2a_art.ui.LoadingDialog;
 import com.faceunity.p2a_art.ui.NormalDialog;
+import com.faceunity.p2a_art.utils.FileUtil;
 import com.faceunity.p2a_art.utils.ToastUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -184,6 +191,7 @@ public class EditFaceFragment extends BaseFragment
             @Override
             public void onScrollListener(EditFacePoint point, float distanceX, float distanceY) {
                 if (mEditFaceParameter != null) {
+                    Log.e(TAG, "onScrollListener: " + distanceX+"--"+distanceY);
                     mEditFaceParameter.setParamFaceShape(point, distanceX, distanceY);
                 }
                 updateSaveBtn();
@@ -425,6 +433,55 @@ public class EditFaceFragment extends BaseFragment
         }
     };
 
+    private boolean deformHair(int pos) {
+
+        if (pos > 0 && mAvatarP2A.getHairFile().startsWith(Constant.filePath)) {
+            File file = new File(mAvatarP2A.getHairFile());
+            if (!file.exists() || file.length() <= 0) {
+                if (mLoadingDialogHair == null) {
+                    mLoadingDialogHair = new LoadingDialog();
+                    mLoadingDialogHair.setLoadingStr("头发下载中...");
+                }
+                mLoadingDialogHair.show(getChildFragmentManager(), LoadingDialog.TAG);
+                downHair(pos);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 本地deform头发
+     *
+     * @param pos
+     */
+    private void downHair(final int pos) {
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                byte[] objData = FileUtil.readBytes(mAvatarP2A.getHeadFile());
+                if (objData == null)
+                    return;
+                List<BundleRes> hairBundles = FilePathFactory.hairBundleRes(mAvatarP2A.getGender());
+                BundleRes hair = hairBundles.get(pos);
+                try {
+                    P2AClientWrapper.deformHairByServer(mActivity, objData, hair.path, mAvatarP2A.getBundleDir() + hair.name);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLoadingDialogHair.dismiss();
+                        mAvatarHandle.setAvatar(mAvatarP2A);
+                        updateSaveBtn();
+                    }
+                });
+            }
+        });
+    }
+
     private LoadingDialog mLoadingDialogHair;
     private boolean isStartLoading = false;
 
@@ -435,18 +492,7 @@ public class EditFaceFragment extends BaseFragment
                 case TITLE_HAIR_INDEX:
                     mAvatarP2A.setHairIndex(pos);
 
-                    if (mAvatarP2A.getHairFile().contains(Constant.filePath)) {
-                        File file = new File(mAvatarP2A.getHairFile());
-                        if (!file.exists() || file.length() <= 0) {
-                            if (mLoadingDialogHair == null) {
-                                mLoadingDialogHair = new LoadingDialog();
-                                mLoadingDialogHair.setLoadingStr("头发下载中...");
-                            }
-                            mLoadingDialogHair.show(getChildFragmentManager(), LoadingDialog.TAG);
-                            isStartLoading = true;
-                            return;
-                        }
-                    }
+                    if (deformHair(pos)) return;
                     //Log.e("ssss", "file=" + mAvatarP2A.getHairFile());
                     break;
                 case TITLE_BEARD_INDEX:

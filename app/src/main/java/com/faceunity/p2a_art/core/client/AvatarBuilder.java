@@ -58,17 +58,17 @@ public class AvatarBuilder {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    try {
-                        for (int i = 0; i < hairBundles.size(); i++) {
-                            if (isCancel) return;
-                            BundleRes hair = hairBundles.get(i);
-                            if (!TextUtils.isEmpty(hair.path) && i != avatarP2A.getHairIndex()) {
-                                P2AClientWrapper.deformHairByServer(mContext, objData, hair.path, avatarP2A.getBundleDir() + hair.name);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        for (int i = 0; i < hairBundles.size(); i++) {
+//                            if (isCancel) return;
+//                            BundleRes hair = hairBundles.get(i);
+//                            if (!TextUtils.isEmpty(hair.path) && i != avatarP2A.getHairIndex()) {
+//                                P2AClientWrapper.deformHairByServer(mContext, objData, hair.path, avatarP2A.getBundleDir() + hair.name);
+//                            }
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
                     if (createComplete != null)
                         createComplete.run();
                 }

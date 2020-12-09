@@ -60,7 +60,9 @@ public class AvatarFragment extends BaseFragment
 
         view.findViewById(R.id.avatar_bottom_item_delete).setOnClickListener(this);
         view.findViewById(R.id.avatar_bottom_item_create).setOnClickListener(this);
-        view.findViewById(R.id.avatar_bottom_item_switch).setOnClickListener(this);
+//        view.findViewById(R.id.avatar_bottom_item_switch).setOnClickListener(this);
+        view.findViewById(R.id.avatar_bottom_item_switch).setAlpha(0.5f);
+        view.findViewById(R.id.avatar_bottom_item_switch).setEnabled(false);
 
         mEditRecycler = view.findViewById(R.id.avatar_bottom_recycler);
         mEditRecycler.setLayoutManager(mGridLayoutManager = new GridLayoutManager(mActivity, spanCount, GridLayoutManager.VERTICAL, false));

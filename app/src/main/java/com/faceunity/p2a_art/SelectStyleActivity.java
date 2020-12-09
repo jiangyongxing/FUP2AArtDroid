@@ -15,6 +15,7 @@ public class SelectStyleActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_style);
+        findViewById(R.id.select_style_new).performClick();
     }
 
     @Override
